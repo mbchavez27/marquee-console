@@ -43,6 +43,10 @@
 build/
 Build/
 build-*/
+obj/
+
+# Project binary
+marquee_app
 
 # CMake generated files
 CMakeFiles/
