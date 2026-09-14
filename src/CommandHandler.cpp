@@ -3,9 +3,10 @@
 #include <iostream>
 #include <string>
 
-CommandHandler::CommandHandler(Marquee& m) : marquee(m) {}
+CommandHandler::CommandHandler(Marquee &m) : marquee(m) {}
 
-void CommandHandler::print_help() {
+void CommandHandler::print_help()
+{
     std::cout << "help - show commands\n"
               << "start_marquee - begin scrolling\n"
               << "stop_marquee - pause scrolling\n"
@@ -14,30 +15,59 @@ void CommandHandler::print_help() {
               << "exit - quit\n";
 }
 
-void CommandHandler::run() {
+void CommandHandler::print_group()
+{
+    std::cout << "Group Developers:\n"
+              << "Chavez, Max Benedict B.\n";
+    std::cout << "\n";
+}
+
+void CommandHandler::run()
+{
     std::string command;
-    print_help();
-    while (marquee.is_app_alive) {
-        std::cout << "> ";
-        if (!std::getline(std::cin, command)) {
+
+    // Prints Once
+    std::cout << "Welcome to CSOPESY!\n";
+    std::cout << "\n";
+
+    // Runs every time
+    while (marquee.is_app_alive)
+    {
+        print_group();
+        std::cout << "Command > ";
+        if (!std::getline(std::cin, command))
+        {
             break;
         }
-        if (command == "help") {
+        if (command == "help")
+        {
             print_help();
-        } else if (command == "start_marquee") {
+        }
+        else if (command == "start_marquee")
+        {
             std::cout << "[TODO] start_marquee\n";
-        } else if (command == "stop_marquee") {
+        }
+        else if (command == "stop_marquee")
+        {
             std::cout << "[TODO] stop_marquee\n";
-        } else if (command == "set_text") {
+        }
+        else if (command == "set_text")
+        {
             std::cout << "[TODO] set_text\n";
-        } else if (command == "set_speed") {
+        }
+        else if (command == "set_speed")
+        {
             std::cout << "[TODO] set_speed\n";
-        } else if (command == "exit") {
+        }
+        else if (command == "exit")
+        {
             marquee.is_app_alive = false;
             marquee.is_running = false;
             std::cout << "Goodbye.\n";
             break;
-        } else if (!command.empty()) {
+        }
+        else if (!command.empty())
+        {
             std::cout << "Unknown command. Type 'help'.\n";
         }
     }
