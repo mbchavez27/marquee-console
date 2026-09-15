@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 
+// [TODO]: add comments for description
+
 CommandHandler::CommandHandler(Marquee &m) : marquee(m) {}
 
 void CommandHandler::print_help()
@@ -51,15 +53,25 @@ void CommandHandler::run()
         }
         else if (command == "start_marquee")
         {
+            std::cout << "\n";
             marquee.start_marquee();
+            std::cout << "\n";
         }
         else if (command == "stop_marquee")
         {
+            std::cout << "\n";
             marquee.stop_marquee();
+            std::cout << "\n";
         }
         else if (command == "set_text")
         {
-            std::cout << "[TODO] set_text\n";
+            std::cout << "Enter text: " << std::flush;
+            std::string next_text;
+            if (!std::getline(std::cin, next_text))
+            {
+                break;
+            }
+            marquee.set_text(next_text);
         }
         else if (command == "set_speed")
         {

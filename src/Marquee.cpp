@@ -85,3 +85,9 @@ void Marquee::stop_marquee()
     }
     clear_line();
 }
+
+void Marquee::set_text(const std::string &next_text)
+{
+    std::lock_guard<std::mutex> lock(text_mutex);
+    marquee_text = next_text;
+}
