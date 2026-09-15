@@ -3,10 +3,19 @@
 #include <iostream>
 #include <string>
 
-// [TODO]: add comments for description
-
+/**
+ * @brief Constructs a new CommandHandler object.
+ *
+ * @param m Reference to the Marquee instance that this handler will control.
+ */
 CommandHandler::CommandHandler(Marquee &m) : marquee(m) {}
 
+/**
+ * @brief Outputs the list of available commands to the console.
+ *
+ * Prints the exact 7 supported commands: help, start_marquee,
+ * stop_marquee, set_text, set_speed, clear_screen, exit.
+ */
 void CommandHandler::print_help()
 {
     std::cout << "help - show commands\n"
@@ -19,6 +28,12 @@ void CommandHandler::print_help()
     std::cout << "\n";
 }
 
+/**
+ * @brief Prints the developer roster.
+ *
+ * Outputs "Group Developers:" followed by the member names.
+ * Called once per prompt iteration in run().
+ */
 void CommandHandler::print_group()
 {
     std::cout << "Group Developers:\n"
@@ -26,7 +41,14 @@ void CommandHandler::print_group()
     std::cout << "\n";
 }
 
-// Displays the main menu after running
+/**
+ * @brief Main execution loop for the command-line interface.
+ *
+ * Prints the Welcome/CSOPESY greeting once, then per iteration prints
+ * the developer roster via print_group() and prompts with "Command > ".
+ * Parses standard input with std::getline and dispatches to the Marquee
+ * until exit or EOF.
+ */
 void CommandHandler::run()
 {
     std::string command;
@@ -37,15 +59,18 @@ void CommandHandler::run()
     std::cout << "Don't know what to type? Type help to know the commands!\n";
     std::cout << "\n";
 
-    // Runs every time
+    // Runs continuously until the 'exit' command is issued or EOF is reached
     while (marquee.is_app_alive)
     {
         print_group();
         std::cout << "Command > ";
+
+        // Wait for user input; break if the input stream fails (e.g., EOF)
         if (!std::getline(std::cin, command))
         {
             break;
         }
+
         if (command == "help")
         {
             std::cout << "\n";
@@ -68,6 +93,8 @@ void CommandHandler::run()
             std::cout << "\n";
             std::cout << "Enter text: " << std::flush;
             std::string next_text;
+
+            // Wait for the multi-word string payload
             if (!std::getline(std::cin, next_text))
             {
                 break;
@@ -84,6 +111,8 @@ void CommandHandler::run()
             {
                 break;
             }
+
+            // Safely parse user input into an integer
             try
             {
                 int value = std::stoi(line);
@@ -99,6 +128,7 @@ void CommandHandler::run()
             }
             catch (const std::exception &)
             {
+                // Catch invalid types (e.g., letters) or out-of-range values
                 std::cout << "Invalid speed. Must be a positive integer greater than 0.\n";
             }
         }
@@ -108,6 +138,7 @@ void CommandHandler::run()
         }
         else if (command == "exit")
         {
+            // Shut down the app loop: clear both flags, print goodbye, break
             marquee.is_app_alive = false;
             marquee.is_running = false;
             std::cout << "Goodbye.\n";
