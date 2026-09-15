@@ -4,21 +4,21 @@
 
 - **Language:** C++ (Standard C++17 or higher).
 - **Environment:** Console/Terminal application.
-- **Primary Goal:** Build a CLI tool that continuously animates a scrolling text string on screen while concurrently accepting standard input commands from the user to manipulate the animation state.
+- **Primary Goal:** Build a CLI tool that prints text as a one-shot 5-row ASCII banner in a single-threaded `Command > ` loop. No worker thread, no scrolling animation yet.
 
 ## 2. Architectural Guidelines
 
-- **Concurrency Model:** The application requires multithreading using `<thread>`.
-  - **Thread A (Main Thread):** Dedicated to `std::cin` blocking input, command parsing, and menu display.
-  - **Thread B (Worker Thread):** Dedicated to managing the console output and sleeping/refreshing the screen at the defined speed interval.
-- **Thread Safety:** Shared state variables (e.g., `current_text`, `refresh_speed_ms`, `is_running`, `should_exit`) must be protected using `std::mutex` and `std::atomic` to prevent race conditions when the user issues commands while the marquee is running.
-- **Screen Handling:** The worker thread will likely need to clear the console or utilize carriage returns (`\r`) to create the illusion of animation without flooding the terminal history.
+- **Concurrency Model:** Single-threaded main loop only. No `<thread>`, no worker.
+  - **Main Loop:** Dedicated to `std::cin` blocking input via `std::getline`, command parsing, greeting + roster + `Command > ` prompt, and one-shot ASCII dispatch.
+  - **No Worker Thread:** `start_marquee` snapshots text and prints 5 rows once; `speed_ms` is stored only.
+- **Thread Safety:** Shared state variables (e.g., `marquee_text`, `speed_ms`, `is_running`, `is_app_alive`) use `std::mutex` and `std::atomic`. Atomics/mutex kept for future worker, narrow lock scope today.
+- **Screen Handling:** Helpers only — `clear_line` sends `\033[2K\r`, `clear_screen` sends `\033[2J\033[H` (+ Win32 fallback). No animation loop.
 
 ## 3. Global State Variables
 
-- `std::atomic<bool> is_running`: Toggled by `start_marquee` and `stop_marquee`.
-- `std::atomic<bool> is_app_alive`: Set to false by `exit` to cleanly join threads.
-- `std::atomic<int> speed_ms`: Dictates the sleep duration of the worker thread.
+- `std::atomic<bool> is_running`: One-shot flag via `exchange` in `start/stop_marquee`.
+- `std::atomic<bool> is_app_alive`: Set to false by `exit` to break the main loop.
+- `std::atomic<int> speed_ms`: Stored via `set_speed`, not yet used for timing.
 - `std::string marquee_text`: The text payload to display (guarded by a mutex).
 
 ## 4. Command Router
@@ -26,12 +26,15 @@
 The main loop must listen for the following precise string commands. Detailed implementation specs for each command are located in the `specs/` directory.
 Static ASCII-art rendering (text -> 5-row banner, print loop) is specified in `specs/ascii_art.md`.
 
-1.  `help` - Print command list.
-2.  `start_marquee` - Set `is_running = true`.
-3.  `stop_marquee` - Set `is_running = false`.
-4.  `set_text` - Prompt for string, lock mutex, update `marquee_text`.
-5.  `set_speed` - Prompt for int, update `speed_ms`.
-6.  `exit` - Set `is_app_alive = false`, join threads, terminate.
+1.  `help` - Print exact 7 supported commands.
+2.  `start_marquee` - One-shot ASCII print; `Marquee is already running.` if on.
+3.  `stop_marquee` - Set `is_running = false` + `clear_line()`; `Marquee is already stopped.` if off.
+4.  `set_text` - Prompt `Enter text: `, lock mutex, update `marquee_text`.
+5.  `set_speed` - Print current speed, prompt for int, validate `> 0`, update `speed_ms`.
+6.  `clear_screen` - Wipe viewport, no state change.
+7.  `exit` - Set `is_app_alive = false`, `is_running = false`, print goodbye, break loop, return `0`.
+
+Per-prompt chrome: `Welcome to CSOPESY!` greeting once, then `Group Developers:` roster + `Command > ` every iteration. Unknown input prints `Unknown command. Type 'help'.`.
 
 ## 5. Coding Standards & Best Practices
 

@@ -1,7 +1,7 @@
 # Module: ASCII Art Renderer
 
 Pure text-to-banner renderer. No threading, no animation, no screen control.
-Scrolling behavior is defined in `master_specs.md §2` and `cmd_start_stop.md`.
+No scrolling exists yet; `Marquee::start_marquee()` does a one-shot print.
 
 ## 1. API
 
@@ -77,4 +77,4 @@ Printed via the loop in §6, each row terminated with `\n`.
 
 - No frame slicing (`substr(offset)`), no `speed_ms` sleep, no `clear_line` redraw.
 - No cursor movement or ANSI codes in this module.
-- All animation lives in the worker-thread specs.
+- No animation yet; scrolling worker is future work.
