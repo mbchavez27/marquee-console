@@ -24,16 +24,16 @@ Screen helpers use ANSI escapes: `clear_line` sends `\033[2K\r`, `clear_screen` 
 ## Requirements
 
 - Linux + `g++` with C++17 support
-- `make`
-- `pthread` (linked via `-pthread`)
+- `cmake` >= 3.16
+- `pthread` (linked via `Threads::Threads`)
 
 ## Build & Run
 
 ```bash
-make          # builds ./marquee_app from src/*.cpp
-./marquee_app # run
-make run      # build + run in one step
-make clean    # removes obj/ and binary
+cmake -S . -B build          # configure once
+cmake --build build          # builds ./build/marquee_app
+./build/marquee_app          # run
+cmake --build build --target run  # build + run in one step
 ```
 
 ## Commands
@@ -112,10 +112,10 @@ Goodbye.
 ## Project layout
 
 ```text
-Makefile      # all / clean / run, BIN=marquee_app
+CMakeLists.txt  # add_executable(marquee_app), run target
 src/          # main.cpp, Marquee.cpp, CommandHandler.cpp, AsciiArt.cpp
 include/      # Marquee.h, CommandHandler.h, AsciiArt.h
-obj/          # build objects (gitignored)
+build/        # CMake out-of-source build (gitignored)
 specs/        # master_specs.md + per-command specs
 LICENSE       # MIT
 ```
@@ -124,7 +124,7 @@ LICENSE       # MIT
 
 - Single-threaded: no worker thread yet, `speed_ms` is stored only.
 - `clear_line()` is only reached via `stop_marquee`; no `clear_line` command routed.
-- `.gitignore` covers `obj/` and `marquee_app`.
+- `.gitignore` covers `build/` and CMake-generated files.
 
 ## License
 
