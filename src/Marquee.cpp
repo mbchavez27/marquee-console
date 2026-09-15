@@ -91,3 +91,8 @@ void Marquee::set_text(const std::string &next_text)
     std::lock_guard<std::mutex> lock(text_mutex);
     marquee_text = next_text;
 }
+
+void Marquee::set_speed(int new_speed_ms)
+{
+    speed_ms.store(new_speed_ms);
+}

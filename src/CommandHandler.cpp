@@ -65,6 +65,7 @@ void CommandHandler::run()
         }
         else if (command == "set_text")
         {
+            std::cout << "\n";
             std::cout << "Enter text: " << std::flush;
             std::string next_text;
             if (!std::getline(std::cin, next_text))
@@ -75,7 +76,31 @@ void CommandHandler::run()
         }
         else if (command == "set_speed")
         {
-            std::cout << "[TODO] set_speed\n";
+            std::cout << "\n";
+            std::cout << "Current speed is " << marquee.speed_ms << "ms\n\n";
+            std::cout << "Enter new speed (in milliseconds): " << std::flush;
+            std::string line;
+            if (!std::getline(std::cin, line))
+            {
+                break;
+            }
+            try
+            {
+                int value = std::stoi(line);
+                if (value <= 0)
+                {
+                    std::cout << "Invalid speed. Must be a positive integer greater than 0.\n";
+                }
+                else
+                {
+                    marquee.set_speed(value);
+                    std::cout << "Speed set to " << value << "ms\n\n";
+                }
+            }
+            catch (const std::exception &)
+            {
+                std::cout << "Invalid speed. Must be a positive integer greater than 0.\n";
+            }
         }
         else if (command == "clear_screen")
         {

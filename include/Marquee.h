@@ -16,6 +16,7 @@ public:
     void start_marquee();
     void stop_marquee();
     void set_text(const std::string &next_text);
+    void set_speed(int new_speed_ms);
     void clear_line();
     void clear_screen();
 };
