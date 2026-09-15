@@ -91,6 +91,7 @@ void CommandHandler::run()
         else if (command == "set_text")
         {
             std::cout << "\n";
+            std::cout << "Current text is " << marquee.marquee_text << "\n\n";
             std::cout << "Enter text: " << std::flush;
             std::string next_text;
 
@@ -99,6 +100,8 @@ void CommandHandler::run()
             {
                 break;
             }
+
+            std::cout << "New text set to " << next_text << "\n\n";
             marquee.set_text(next_text);
         }
         else if (command == "set_speed")
