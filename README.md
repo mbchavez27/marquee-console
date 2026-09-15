@@ -1,25 +1,25 @@
 # marquee-console
 
-A multithreaded C++ console app that scrolls a text marquee while concurrently accepting user commands. Built for CSOPESY (OS emulator exercise).
+A single-threaded C++ console app that prints text as a one-shot 5-row ASCII banner. Built for CSOPESY (OS emulator exercise).
 
 ## What it does
 
-Continuously animates a scrolling string on the terminal, while the main thread stays responsive to input commands that mutate the animation state (text, speed, start/stop).
+Prompts for commands in a `Command > ` loop and prints the current text as ASCII art on `start_marquee`. Mutates display state in place via `set_text`, `set_speed`, `start/stop_marquee`, `clear_screen`.
 
 ## How it works
 
-- **Thread A (Main):** blocks on `std::getline(std::cin, ...)`, parses commands.
-- **Thread B (Worker):** render loop — prints marquee frame, sleeps for `speed_ms`.
+- **Main loop only:** blocks on `std::getline(std::cin, ...)`, parses commands.
+- No worker thread, no scrolling animation yet. `start_marquee` snapshots text and prints 5 rows once.
 - **Shared state:**
 
 | Variable       | Type                | Guard                                          |
 | -------------- | ------------------- | ---------------------------------------------- |
-| `is_running`   | `std::atomic<bool>` | lock-free toggle via `start/stop_marquee`      |
-| `is_app_alive` | `std::atomic<bool>` | `false` on `exit` to join threads              |
-| `speed_ms`     | `std::atomic<int>`  | set via `set_speed`                            |
+| `is_running`   | `std::atomic<bool>` | one-shot flag via `exchange` in `start/stop_marquee` |
+| `is_app_alive` | `std::atomic<bool>` | `false` on `exit` to break loop                |
+| `speed_ms`     | `std::atomic<int>`  | stored via `set_speed`, not yet used for timing |
 | `marquee_text` | `std::string`       | `std::mutex` + `std::lock_guard`, narrow scope |
 
-Screen refresh uses carriage return (`\r`) / clear to animate without flooding history.
+Screen helpers use ANSI escapes: `clear_line` sends `\033[2K\r`, `clear_screen` sends `\033[2J\033[H`.
 
 ## Requirements
 
@@ -40,28 +40,72 @@ make clean    # removes obj/ and binary
 
 | Command         | Action                                                                                  |
 | --------------- | --------------------------------------------------------------------------------------- |
-| `help`          | List all commands with descriptions.                                                    |
-| `start_marquee` | Set `is_running=true`. Prints `Marquee is already running.` if already on.              |
-| `stop_marquee`  | Set `is_running=false`. Prints `Marquee is already stopped.` if already off.            |
-| `set_text`      | Prompt for string, lock mutex, update `marquee_text`.                                   |
-| `set_speed`     | Prompt `Enter new speed (in milliseconds): `, validate positive int, update `speed_ms`. |
-| `exit`          | Set `is_app_alive=false`, `is_running=false`, join worker, print goodbye, return `0`.   |
+| `help`          | Print exact 7 supported commands.                                                       |
+| `start_marquee` | Print 5-row ASCII banner. Prints `Marquee is already running.` if already on.           |
+| `stop_marquee`  | Set `is_running=false` + `clear_line()`. Prints `Marquee is already stopped.` if off.   |
+| `set_text`      | Prompt `Enter text: `, lock mutex, update `marquee_text`.                               |
+| `set_speed`     | Print `Current speed is Xms`, prompt `Enter new speed (in milliseconds): `, validate positive int, update `speed_ms`. |
+| `clear_screen`  | Call `Marquee::clear_screen()` without mutating shared state.                           |
+| `exit`          | Set `is_app_alive=false`, `is_running=false`, print `Goodbye.`, break loop, return `0`. |
+
+Per-prompt chrome: greeting `Welcome to CSOPESY!` + `Don't know what to type?...` once, then every iteration `Group Developers:` roster + `Command > `. Unknown input prints `Unknown command. Type 'help'.`.
 
 ## Example session
 
 ```text
-> help
+Welcome to CSOPESY!
+
+Don't know what to type? Type help to know the commands!
+
+Group Developers:
+Chavez, Max Benedict B.
+
+Command > help
+
 help - show commands
 start_marquee - begin scrolling
-...
-> set_text
-Enter text: Hello CSOPESY!
-> set_speed
+stop_marquee - pause scrolling
+set_text - change marquee text
+set_speed - change speed (ms)
+clear_screen - clear the screen
+exit - quit
+
+Group Developers:
+Chavez, Max Benedict B.
+
+Command > set_text
+
+Enter text: Hi!
+Group Developers:
+Chavez, Max Benedict B.
+
+Command > set_speed
+
+Current speed is 200ms
+
 Enter new speed (in milliseconds): 100
-> start_marquee
-Hello CSOPESY! scrolling...
-> stop_marquee
-> exit
+Speed set to 100ms
+
+Group Developers:
+Chavez, Max Benedict B.
+
+Command > start_marquee
+
+#   # #####   #
+#   #   #     #
+#####   #     #
+#   #   #
+#   # #####   #
+
+Group Developers:
+Chavez, Max Benedict B.
+
+Command > stop_marquee
+
+Group Developers:
+Chavez, Max Benedict B.
+
+Command > exit
 Goodbye.
 ```
 
@@ -69,16 +113,18 @@ Goodbye.
 
 ```text
 Makefile      # all / clean / run, BIN=marquee_app
-src/          # *.cpp sources (currently empty — implementation pending)
+src/          # main.cpp, Marquee.cpp, CommandHandler.cpp, AsciiArt.cpp
+include/      # Marquee.h, CommandHandler.h, AsciiArt.h
+obj/          # build objects (gitignored)
 specs/        # master_specs.md + per-command specs
 LICENSE       # MIT
 ```
 
 ## Notes
 
-- `specs/cmd_set_text.md` is currently empty; behavior above follows `master_specs.md §4`.
-- `Makefile` passes `-Iinclude` but no `include/` dir exists yet.
-- `.gitignore` does not yet cover `obj/` or `marquee_app`.
+- Single-threaded: no worker thread yet, `speed_ms` is stored only.
+- `clear_line()` is only reached via `stop_marquee`; no `clear_line` command routed.
+- `.gitignore` covers `obj/` and `marquee_app`.
 
 ## License
 
