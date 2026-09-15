@@ -12,7 +12,9 @@ void CommandHandler::print_help()
               << "stop_marquee - pause scrolling\n"
               << "set_text - change marquee text\n"
               << "set_speed - change speed (ms)\n"
+              << "clear_line - clear the line\n"
               << "exit - quit\n";
+    std::cout << "\n";
 }
 
 void CommandHandler::print_group()
@@ -22,12 +24,15 @@ void CommandHandler::print_group()
     std::cout << "\n";
 }
 
+// Displays the main menu after running
 void CommandHandler::run()
 {
     std::string command;
 
     // Prints Once
     std::cout << "Welcome to CSOPESY!\n";
+    std::cout << "\n";
+    std::cout << "Don't know what to type? Type help to know the commands!\n";
     std::cout << "\n";
 
     // Runs every time
@@ -41,15 +46,16 @@ void CommandHandler::run()
         }
         if (command == "help")
         {
+            std::cout << "\n";
             print_help();
         }
         else if (command == "start_marquee")
         {
-            std::cout << "[TODO] start_marquee\n";
+            marquee.start_marquee();
         }
         else if (command == "stop_marquee")
         {
-            std::cout << "[TODO] stop_marquee\n";
+            marquee.stop_marquee();
         }
         else if (command == "set_text")
         {
@@ -58,6 +64,10 @@ void CommandHandler::run()
         else if (command == "set_speed")
         {
             std::cout << "[TODO] set_speed\n";
+        }
+        else if (command == "clear_line")
+        {
+            marquee.clear_line();
         }
         else if (command == "exit")
         {
