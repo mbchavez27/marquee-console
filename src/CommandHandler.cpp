@@ -12,7 +12,7 @@ void CommandHandler::print_help()
               << "stop_marquee - pause scrolling\n"
               << "set_text - change marquee text\n"
               << "set_speed - change speed (ms)\n"
-              << "clear_line - clear the line\n"
+              << "clear_screen - clear the screen\n"
               << "exit - quit\n";
     std::cout << "\n";
 }
@@ -65,9 +65,9 @@ void CommandHandler::run()
         {
             std::cout << "[TODO] set_speed\n";
         }
-        else if (command == "clear_line")
+        else if (command == "clear_screen")
         {
-            marquee.clear_line();
+            marquee.clear_screen();
         }
         else if (command == "exit")
         {

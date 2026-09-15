@@ -15,4 +15,5 @@ public:
     void start_marquee();
     void stop_marquee();
     void clear_line();
+    void clear_screen();
 };
