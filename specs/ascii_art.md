@@ -73,8 +73,9 @@ No scrolling exists yet; `Marquee::start_marquee()` does a one-shot print.
 
 Printed via the loop in §6, each row terminated with `\n`.
 
-## 8. Non-Goals
+## 8. Scrolling Animation Support
 
-- No frame slicing (`substr(offset)`), no `speed_ms` sleep, no `clear_line` redraw.
-- No cursor movement or ANSI codes in this module.
-- No animation yet; scrolling worker is future work.
+- `convert_to_ascii` continues to produce the canonical 5-row full ASCII representation for any given text.
+- For continuous horizontal scrolling, the marquee worker slices a viewport window of width `W` across the generated 5 rows (e.g., using modular index slicing `(offset + col) % total_width`), shifting `offset` on each frame interval of `speed_ms`.
+- Purity and thread safety remain preserved; callers handle synchronization and terminal rendering.
+

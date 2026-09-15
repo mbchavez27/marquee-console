@@ -37,7 +37,8 @@ void CommandHandler::print_help()
 void CommandHandler::print_group()
 {
     std::cout << "Group Developers:\n"
-              << "Chavez, Max Benedict B.\n";
+              << "Chavez, Max Benedict B.\n"
+              << "Leano, Jeremy L.\n";
     std::cout << "\n";
 }
 
@@ -138,12 +139,15 @@ void CommandHandler::run()
         else if (command == "clear_screen")
         {
             marquee.clear_screen();
+            if (marquee.is_running)
+            {
+                marquee.render_current_frame();
+            }
         }
         else if (command == "exit")
         {
-            // Shut down the app loop: clear both flags, print goodbye, break
-            marquee.is_app_alive = false;
-            marquee.is_running = false;
+            // Shut down the app loop: stop worker thread cleanly, print goodbye, break
+            marquee.stop_worker();
             std::cout << "Goodbye.\n";
             break;
         }

@@ -8,4 +8,5 @@
 3. Read the user input.
 4. Validate that the input is a positive integer greater than 0. If invalid, print an error and abort the command.
 5. Update the atomic variable `speed_ms` with the new integer.
-   **Post-conditions:** `speed_ms` is stored. No worker timing exists yet.
+   **Post-conditions:** `speed_ms` is stored atomically. If marquee is currently running, the live scrolling loop immediately adjusts its frame interval to the new speed without requiring a restart.
+

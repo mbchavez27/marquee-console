@@ -1,7 +1,10 @@
 #pragma once
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <string>
+#include <thread>
+#include <vector>
 
 /**
  * @brief Represents a thread-safe, controllable scrolling text display (marquee).
@@ -30,21 +33,20 @@ public:
     /// Mutex protecting read/write access to marquee_text.
     std::mutex text_mutex;
 
+    Marquee();
+    ~Marquee();
+
     /**
-     * @brief Prints the current text as a one-shot ASCII banner.
+     * @brief Starts or resumes continuous background marquee scrolling.
      *
-     * Sets is_running to true via exchange. Prints
-     * "Marquee is already running." if already on, otherwise snapshots
-     * marquee_text and prints its 5-row ASCII art.
+     * Sets is_running to true. Prints "Marquee is already running." if already on.
      */
     void start_marquee();
 
     /**
-     * @brief Stops banner output and clears the current line.
+     * @brief Stops/pauses marquee scrolling and clears the marquee display rows.
      *
-     * Sets is_running to false via exchange. Prints
-     * "Marquee is already stopped." if already off, otherwise calls
-     * clear_line().
+     * Sets is_running to false. Prints "Marquee is already stopped." if already off.
      */
     void stop_marquee();
 
@@ -79,4 +81,27 @@ public:
      * Used for full screen resets or layout changes.
      */
     void clear_screen();
+
+    /**
+     * @brief Renders the current frame at the top of the console.
+     */
+    void render_current_frame();
+
+    /**
+     * @brief Clears the 5 rows occupied by the marquee banner at the top of the screen.
+     */
+    void clear_marquee_area();
+
+    /**
+     * @brief Shuts down the background worker thread cleanly and joins it.
+     */
+    void stop_worker();
+
+private:
+    std::thread worker_thread;
+    std::mutex cv_mutex;
+    std::condition_variable cv;
+    std::size_t scroll_offset{0};
+
+    void worker_loop();
 };
