@@ -3,6 +3,7 @@
 #include <mutex>
 #include <string>
 
+// [TODO]: add comments for description
 class Marquee
 {
 public:

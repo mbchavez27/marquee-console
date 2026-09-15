@@ -1,7 +1,9 @@
 #include "CommandHandler.h"
 #include "Marquee.h"
 
-int main() {
+// [TODO]: add comments for description
+int main()
+{
     Marquee marquee;
     CommandHandler handler(marquee);
     handler.run();

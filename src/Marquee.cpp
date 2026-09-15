@@ -1,10 +1,13 @@
 #include "Marquee.h"
+#include "AsciiArt.h"
 #include <iostream>
 #include <mutex>
 #include <string>
 #ifdef _WIN32
 #include <windows.h>
 #endif
+
+// [TODO]: add comments for description
 
 void Marquee::clear_line()
 {
@@ -64,7 +67,13 @@ void Marquee::start_marquee()
         std::lock_guard<std::mutex> lock(text_mutex);
         snapshot = marquee_text;
     }
-    std::cout << snapshot << "\n";
+
+    const std::vector<std::string> art = ascii_art::convert_to_ascii(snapshot);
+    for (const auto &row : art)
+    {
+        std::cout << row << "\n";
+    }
+    std::cout << std::flush;
 }
 
 void Marquee::stop_marquee()

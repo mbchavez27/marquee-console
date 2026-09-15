@@ -1,5 +1,6 @@
 #pragma once
 
+// [TODO]: add comments for description
 class Marquee;
 
 class CommandHandler

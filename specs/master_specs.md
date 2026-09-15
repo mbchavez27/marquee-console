@@ -23,7 +23,8 @@
 
 ## 4. Command Router
 
-The main loop must listen for the following precise string commands. Detailed implementation specs for each command are located in the `specs/` directory:
+The main loop must listen for the following precise string commands. Detailed implementation specs for each command are located in the `specs/` directory.
+Static ASCII-art rendering (text -> 5-row banner, print loop) is specified in `specs/ascii_art.md`.
 
 1.  `help` - Print command list.
 2.  `start_marquee` - Set `is_running = true`.
