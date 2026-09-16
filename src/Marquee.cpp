@@ -29,17 +29,15 @@ namespace
         return 80;
     }
 
+#ifdef _WIN32
     // Helper to position cursor at 1-based (row, col)
     void move_cursor(int row, int col)
     {
-#ifdef _WIN32
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
         COORD pos = {static_cast<SHORT>(col - 1), static_cast<SHORT>(row - 1)};
         SetConsoleCursorPosition(h, pos);
-#else
-        std::cout << "\033[" << row << ";" << col << "H";
-#endif
     }
+#endif
 }
 
 Marquee::Marquee()
