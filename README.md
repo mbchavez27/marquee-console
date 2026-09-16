@@ -1,25 +1,25 @@
 # marquee-console
 
-A single-threaded C++ console app that prints text as a one-shot 5-row ASCII banner. Built for CSOPESY (OS emulator exercise).
+A multi-threaded C++ console app that displays scrolling text as a 5-row ASCII banner. Built for CSOPESY (OS emulator exercise).
 
 ## What it does
 
-Prompts for commands in a `Command > ` loop and prints the current text as ASCII art on `start_marquee`. Mutates display state in place via `set_text`, `set_speed`, `start/stop_marquee`, `clear_screen`.
+Prompts for commands in a `Command > ` loop and renders a continuously scrolling ASCII banner at the top of the terminal. Text and speed can be changed live while the marquee is running. Screen clearing pauses the marquee, wipes the viewport, redraws the banner, and resumes scrolling — no manual restart needed.
 
 ## How it works
 
-- **Main loop only:** blocks on `std::getline(std::cin, ...)`, parses commands.
-- No worker thread, no scrolling animation yet. `start_marquee` snapshots text and prints 5 rows once.
+- **Two threads:** main thread blocks on `std::getline` for command input; worker thread runs a render-scroll-delay loop in the background.
+- **Synchronization:** `std::atomic<bool>` for `is_running` / `is_app_alive`, `std::atomic<int>` for `speed_ms`, `std::mutex` + `std::lock_guard` for `marquee_text`. A `std::condition_variable` gates the worker sleep and wakes it on state changes.
+- **Scrolling:** Each frame, `render_current_frame()` snapshots `marquee_text`, converts it to 5-row ASCII via `ascii_art::convert_to_ascii`, slices a viewport of width `term_width` using modular indexing `(scroll_offset + col) % total_width`, and writes the rows at terminal positions 1-5 via ANSI escape sequences (Win32 API fallback included).
 - **Shared state:**
 
-| Variable       | Type                | Guard                                          |
-| -------------- | ------------------- | ---------------------------------------------- |
-| `is_running`   | `std::atomic<bool>` | one-shot flag via `exchange` in `start/stop_marquee` |
-| `is_app_alive` | `std::atomic<bool>` | `false` on `exit` to break loop                |
-| `speed_ms`     | `std::atomic<int>`  | stored via `set_speed`, not yet used for timing |
-| `marquee_text` | `std::string`       | `std::mutex` + `std::lock_guard`, narrow scope |
-
-Screen helpers use ANSI escapes: `clear_line` sends `\033[2K\r`, `clear_screen` sends `\033[2J\033[H`.
+| Variable       | Type                | Guard                                                  |
+| -------------- | ------------------- | ------------------------------------------------------ |
+| `is_running`   | `std::atomic<bool>` | `exchange` in `start/stop_marquee`, checked by worker  |
+| `is_app_alive` | `std::atomic<bool>` | `false` on `exit` to break loop and join worker        |
+| `speed_ms`     | `std::atomic<int>`  | `store` via `set_speed`, read by worker for frame delay |
+| `marquee_text` | `std::string`       | `std::mutex` + `std::lock_guard`, narrow scope         |
+| `scroll_offset`| `std::size_t`       | Private to worker, incremented per frame               |
 
 ## Requirements
 
@@ -38,15 +38,15 @@ cmake --build build --target run  # build + run in one step
 
 ## Commands
 
-| Command         | Action                                                                                  |
-| --------------- | --------------------------------------------------------------------------------------- |
-| `help`          | Print exact 7 supported commands.                                                       |
-| `start_marquee` | Print 5-row ASCII banner. Prints `Marquee is already running.` if already on.           |
-| `stop_marquee`  | Set `is_running=false` + `clear_line()`. Prints `Marquee is already stopped.` if off.   |
-| `set_text`      | Prompt `Enter text: `, lock mutex, update `marquee_text`.                               |
-| `set_speed`     | Print `Current speed is Xms`, prompt `Enter new speed (in milliseconds): `, validate positive int, update `speed_ms`. |
-| `clear_screen`  | Call `Marquee::clear_screen()` without mutating shared state.                           |
-| `exit`          | Set `is_app_alive=false`, `is_running=false`, print `Goodbye.`, break loop, return `0`. |
+| Command         | Action                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| `help`          | Print the 7 supported commands.                                                           |
+| `start_marquee` | Start continuous background scrolling. Prints `Marquee is already running.` if already on. |
+| `stop_marquee`  | Pause worker, clear the 5 banner rows. Prints `Marquee is already stopped.` if already off.|
+| `set_text`      | Prompt `Enter text: `, lock mutex, update `marquee_text`. Live update while scrolling.     |
+| `set_speed`     | Print current speed, prompt for new ms value, validate positive int, update `speed_ms`.    |
+| `clear_screen`  | Pause marquee, clear viewport, redraw banner, resume scrolling. Preserves marquee state.   |
+| `exit`          | Set `is_app_alive=false`, join worker thread, print `Goodbye.`, break loop.                |
 
 Per-prompt chrome: greeting `Welcome to CSOPESY!` + `Don't know what to type?...` once, then every iteration `Group Developers:` roster + `Command > `. Unknown input prints `Unknown command. Type 'help'.`.
 
@@ -59,6 +59,7 @@ Don't know what to type? Type help to know the commands!
 
 Group Developers:
 Chavez, Max Benedict B.
+Leano, Jeremy L.
 
 Command > help
 
@@ -72,12 +73,24 @@ exit - quit
 
 Group Developers:
 Chavez, Max Benedict B.
+Leano, Jeremy L.
+
+Command > start_marquee
+
+Group Developers:
+Chavez, Max Benedict B.
+Leano, Jeremy L.
 
 Command > set_text
 
-Enter text: Hi!
+Current text is Hello CSOPESY!
+
+Enter text: CSOPESY Marquee!
+New text set to CSOPESY Marquee!
+
 Group Developers:
 Chavez, Max Benedict B.
+Leano, Jeremy L.
 
 Command > set_speed
 
@@ -88,22 +101,19 @@ Speed set to 100ms
 
 Group Developers:
 Chavez, Max Benedict B.
+Leano, Jeremy L.
 
-Command > start_marquee
-
-#   # #####   #
-#   #   #     #
-#####   #     #
-#   #   #
-#   # #####   #
+Command > clear_screen
 
 Group Developers:
 Chavez, Max Benedict B.
+Leano, Jeremy L.
 
 Command > stop_marquee
 
 Group Developers:
 Chavez, Max Benedict B.
+Leano, Jeremy L.
 
 Command > exit
 Goodbye.
@@ -112,19 +122,21 @@ Goodbye.
 ## Project layout
 
 ```text
-CMakeLists.txt  # add_executable(marquee_app), run target
-src/          # main.cpp, Marquee.cpp, CommandHandler.cpp, AsciiArt.cpp
-include/      # Marquee.h, CommandHandler.h, AsciiArt.h
-build/        # CMake out-of-source build (gitignored)
-specs/        # master_specs.md + per-command specs
-LICENSE       # MIT
+CMakeLists.txt    # add_executable(marquee_app), run target
+src/              # main.cpp, Marquee.cpp, CommandHandler.cpp, AsciiArt.cpp
+include/          # Marquee.h, CommandHandler.h, AsciiArt.h
+build/            # CMake out-of-source build (gitignored)
+specs/            # master_specs.md + per-command specs
+LICENSE           # MIT
 ```
 
 ## Notes
 
-- Single-threaded: no worker thread yet, `speed_ms` is stored only.
-- `clear_line()` is only reached via `stop_marquee`; no `clear_line` command routed.
-- `.gitignore` covers `build/` and CMake-generated files.
+- Worker thread uses `std::condition_variable` to sleep between frames and wake early on `stop_marquee` or `exit`.
+- `clear_line()` is internal — called only by `stop_marquee` to wipe the banner rows.
+- `render_current_frame()` uses raw ANSI escape sequences (Win32 `SetConsoleCursorPosition` fallback).
+- `move_cursor()` is Windows-only, guarded by `#ifdef _WIN32`.
+- `.gitignore` covers `build/`, object files, and CMake-generated files.
 
 ## License
 
