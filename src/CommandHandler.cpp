@@ -139,10 +139,6 @@ void CommandHandler::run()
         else if (command == "clear_screen")
         {
             marquee.clear_screen();
-            if (marquee.is_running)
-            {
-                marquee.render_current_frame();
-            }
         }
         else if (command == "exit")
         {

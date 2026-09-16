@@ -102,6 +102,12 @@ void Marquee::clear_line()
  */
 void Marquee::clear_screen()
 {
+    bool was_running = is_running.exchange(false);
+    if (was_running)
+    {
+        cv.notify_all();
+    }
+
 #ifdef _WIN32
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
@@ -112,7 +118,6 @@ void Marquee::clear_screen()
     }
     else
     {
-        // Fallback: manually fill the console buffer with spaces
         COORD top = {0, 0};
         CONSOLE_SCREEN_BUFFER_INFO info;
         DWORD written = 0;
@@ -126,6 +131,13 @@ void Marquee::clear_screen()
 #else
     std::cout << "\033[2J\033[H" << std::flush;
 #endif
+
+    if (was_running)
+    {
+        render_current_frame();
+        is_running = true;
+        cv.notify_all();
+    }
 }
 
 void Marquee::clear_marquee_area()
@@ -219,9 +231,8 @@ void Marquee::worker_loop()
     {
         {
             std::unique_lock<std::mutex> lock(cv_mutex);
-            cv.wait(lock, [this]() {
-                return !is_app_alive || is_running.load();
-            });
+            cv.wait(lock, [this]()
+                    { return !is_app_alive || is_running.load(); });
         }
 
         if (!is_app_alive)
@@ -241,9 +252,8 @@ void Marquee::worker_loop()
             }
 
             std::unique_lock<std::mutex> lock(cv_mutex);
-            cv.wait_for(lock, std::chrono::milliseconds(delay), [this]() {
-                return !is_app_alive || !is_running.load();
-            });
+            cv.wait_for(lock, std::chrono::milliseconds(delay), [this]()
+                        { return !is_app_alive || !is_running.load(); });
         }
     }
 }
