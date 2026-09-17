@@ -49,7 +49,7 @@ public:
      * @brief Prints the welcome/CSOPESY greeting message.
      *
      * Outputs a welcome banner and a hint to type 'help'.
-     * Called once per prompt iteration in run().
+     * Called once before the command loop starts.
      */
     void print_greetings();
 

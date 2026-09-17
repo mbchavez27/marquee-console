@@ -40,16 +40,28 @@ namespace
 #endif
 }
 
+/**
+ * @brief Constructs the Marquee and spawns the background worker thread.
+ */
 Marquee::Marquee()
 {
     worker_thread = std::thread(&Marquee::worker_loop, this);
 }
 
+/**
+ * @brief Destroys the Marquee, stopping the worker thread before teardown.
+ */
 Marquee::~Marquee()
 {
     stop_worker();
 }
 
+/**
+ * @brief Signals the worker thread to stop and joins it.
+ *
+ * Sets is_app_alive and is_running to false, notifies the condition
+ * variable, and joins the worker thread if it is joinable.
+ */
 void Marquee::stop_worker()
 {
     is_app_alive = false;
@@ -61,6 +73,12 @@ void Marquee::stop_worker()
     }
 }
 
+/**
+ * @brief Clears the 5 rows occupied by the marquee banner at the top of the screen.
+ *
+ * Uses Win32 console APIs on Windows and ANSI escape sequences elsewhere.
+ * Preserves the cursor position after clearing.
+ */
 void Marquee::clear_marquee_area()
 {
 #ifdef _WIN32
@@ -93,6 +111,15 @@ void Marquee::clear_marquee_area()
     std::cout << "\033[u" << std::flush;
 }
 
+/**
+ * @brief Renders one frame of the scrolling marquee at the top of the console.
+ *
+ * Snapshots marquee_text under lock, converts it to 5-row ASCII art,
+ * appends a trailing space to create a gap between repetitions, then
+ * slices a viewport of terminal width using modular arithmetic on the
+ * scroll offset. Writes the rows via ANSI escape sequences (Win32
+ * SetConsoleCursorPosition fallback).
+ */
 void Marquee::render_current_frame()
 {
     std::string snapshot;
@@ -105,6 +132,11 @@ void Marquee::render_current_frame()
     if (art.empty() || art[0].empty())
     {
         return;
+    }
+
+    for (std::size_t r = 0; r < art.size(); ++r)
+    {
+        art[r] += ' ';
     }
 
     std::size_t total_width = art[0].size();
@@ -146,6 +178,13 @@ void Marquee::render_current_frame()
     std::cout << "\033[u" << std::flush;
 }
 
+/**
+ * @brief Background render loop that drives the scrolling animation.
+ *
+ * Waits on a condition variable while paused or stopped. When running,
+ * renders a frame, increments the scroll offset, then sleeps for the
+ * configured speed_ms interval (interruptible by state changes).
+ */
 void Marquee::worker_loop()
 {
     while (is_app_alive)

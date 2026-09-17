@@ -45,7 +45,7 @@ void CommandHandler::print_group()
  * @brief Outputs the welcome/CSOPESY greeting to the console.
  *
  * Prints "Welcome to CSOPESY!" followed by a hint to type 'help'
- * for available commands.
+ * for available commands. Called once before the command loop starts.
  */
 void CommandHandler::print_greetings()
 {
@@ -67,10 +67,11 @@ void CommandHandler::run()
 {
     std::string command;
 
+    print_greetings();
+
     // Runs continuously until the 'exit' command is issued or EOF is reached
     while (marquee.is_app_alive)
     {
-        print_greetings();
         print_group();
         std::cout << "Command > ";
 

@@ -33,7 +33,14 @@ public:
     /// Mutex protecting read/write access to marquee_text.
     std::mutex text_mutex;
 
+    /**
+     * @brief Constructs the Marquee and spawns the background worker thread.
+     */
     Marquee();
+
+    /**
+     * @brief Destroys the Marquee, stopping the worker thread before teardown.
+     */
     ~Marquee();
 
     /**
@@ -89,5 +96,8 @@ private:
     std::condition_variable cv;
     std::size_t scroll_offset{0};
 
+    /**
+     * @brief Background render loop that drives the scrolling animation.
+     */
     void worker_loop();
 };
