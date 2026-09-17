@@ -1,5 +1,6 @@
 #include "Marquee.h"
 #include "AsciiArt.h"
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <mutex>
@@ -31,7 +32,7 @@ namespace
 
 #ifdef _WIN32
     // Helper to position cursor at 1-based (row, col)
-    void move_cursor(int row, int col)
+    [[maybe_unused]] void move_cursor(int row, int col)
     {
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
         COORD pos = {static_cast<SHORT>(col - 1), static_cast<SHORT>(row - 1)};
@@ -86,19 +87,18 @@ void Marquee::clear_marquee_area()
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     if (GetConsoleScreenBufferInfo(h, &csbi))
     {
-        COORD orig_pos = csbi.dwCursorPosition;
         int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
         if (width <= 0)
         {
             width = 80;
         }
+        std::string spaces(width, ' ');
+        DWORD written = 0;
         for (int r = 1; r <= MARQUEE_ROWS; ++r)
         {
-            move_cursor(r, 1);
-            std::cout << std::string(width, ' ');
+            COORD coord = {csbi.srWindow.Left, static_cast<SHORT>(csbi.srWindow.Top + r - 1)};
+            WriteConsoleOutputCharacterA(h, spaces.data(), static_cast<DWORD>(width), coord, &written);
         }
-        SetConsoleCursorPosition(h, orig_pos);
-        std::cout << std::flush;
         return;
     }
 #endif
@@ -159,14 +159,14 @@ void Marquee::render_current_frame()
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     if (GetConsoleScreenBufferInfo(h, &csbi))
     {
-        COORD orig_pos = csbi.dwCursorPosition;
+        int win_width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        DWORD len = static_cast<DWORD>(win_width > 0 ? std::min<std::size_t>(view_width, static_cast<std::size_t>(win_width)) : view_width);
+        DWORD written = 0;
         for (int r = 1; r <= MARQUEE_ROWS; ++r)
         {
-            move_cursor(r, 1);
-            std::cout << sliced[r - 1];
+            COORD coord = {csbi.srWindow.Left, static_cast<SHORT>(csbi.srWindow.Top + r - 1)};
+            WriteConsoleOutputCharacterA(h, sliced[r - 1].data(), len, coord, &written);
         }
-        SetConsoleCursorPosition(h, orig_pos);
-        std::cout << std::flush;
         return;
     }
 #endif

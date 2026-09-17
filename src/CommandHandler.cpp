@@ -73,7 +73,7 @@ void CommandHandler::run()
     while (marquee.is_app_alive)
     {
         print_group();
-        std::cout << "Command > ";
+        std::cout << "Command > " << std::flush;
 
         // Wait for user input; break if the input stream fails (e.g., EOF)
         if (!std::getline(std::cin, command))
