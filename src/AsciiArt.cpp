@@ -19,7 +19,7 @@ namespace ascii_art
          * Each character is represented as an array of 5 strings, corresponding
          * to the 5 horizontal rows that make up the blocky ASCII art.
          */
-        using Glyph = std::array<std::string, 5>;
+        using Glyph = std::array<std::string, MARQUEE_ROWS>;
 
         /**
          * @brief Retrieves the internal dictionary of supported ASCII characters.
@@ -111,7 +111,7 @@ namespace ascii_art
      */
     std::vector<std::string> convert_to_ascii(const std::string &text)
     {
-        std::vector<std::string> rows(5, "");
+        std::vector<std::string> rows(MARQUEE_ROWS, "");
         if (text.empty())
         {
             return rows;

@@ -151,7 +151,7 @@ void Marquee::clear_marquee_area()
         {
             width = 80;
         }
-        for (int r = 1; r <= 5; ++r)
+        for (int r = 1; r <= MARQUEE_ROWS; ++r)
         {
             move_cursor(r, 1);
             std::cout << std::string(width, ' ');
@@ -161,9 +161,9 @@ void Marquee::clear_marquee_area()
         return;
     }
 #endif
-    // ANSI fallback: save cursor, clear lines 1-5, restore cursor
+    // ANSI fallback: save cursor, clear lines 1-MARQUEE_ROWS, restore cursor
     std::cout << "\033[s";
-    for (int r = 1; r <= 5; ++r)
+    for (int r = 1; r <= MARQUEE_ROWS; ++r)
     {
         std::cout << "\033[" << r << ";1H\033[2K";
     }
@@ -189,8 +189,8 @@ void Marquee::render_current_frame()
     std::size_t view_width = static_cast<std::size_t>(term_width > 0 ? term_width : 80);
 
     // Slice viewport horizontally using modular arithmetic
-    std::vector<std::string> sliced(5);
-    for (std::size_t r = 0; r < 5; ++r)
+    std::vector<std::string> sliced(MARQUEE_ROWS);
+    for (std::size_t r = 0; r < MARQUEE_ROWS; ++r)
     {
         sliced[r].reserve(view_width);
         for (std::size_t col = 0; col < view_width; ++col)
@@ -205,7 +205,7 @@ void Marquee::render_current_frame()
     if (GetConsoleScreenBufferInfo(h, &csbi))
     {
         COORD orig_pos = csbi.dwCursorPosition;
-        for (int r = 1; r <= 5; ++r)
+        for (int r = 1; r <= MARQUEE_ROWS; ++r)
         {
             move_cursor(r, 1);
             std::cout << sliced[r - 1];
@@ -216,7 +216,7 @@ void Marquee::render_current_frame()
     }
 #endif
     std::cout << "\033[s";
-    for (int r = 1; r <= 5; ++r)
+    for (int r = 1; r <= MARQUEE_ROWS; ++r)
     {
         std::cout << "\033[" << r << ";1H" << sliced[r - 1];
     }

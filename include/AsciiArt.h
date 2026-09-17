@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+/// Number of rows each ASCII glyph occupies.
+constexpr int MARQUEE_ROWS = 5;
+
 namespace ascii_art
 {
     /**
