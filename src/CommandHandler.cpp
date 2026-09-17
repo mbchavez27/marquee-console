@@ -43,9 +43,23 @@ void CommandHandler::print_group()
 }
 
 /**
+ * @brief Outputs the welcome/CSOPESY greeting to the console.
+ *
+ * Prints "Welcome to CSOPESY!" followed by a hint to type 'help'
+ * for available commands.
+ */
+void CommandHandler::print_greetings()
+{
+    std::cout << "Welcome to CSOPESY!\n";
+    std::cout << "\n";
+    std::cout << "Don't know what to type? Type help to know the commands!\n";
+    std::cout << "\n";
+}
+
+/**
  * @brief Main execution loop for the command-line interface.
  *
- * Prints the Welcome/CSOPESY greeting once, then per iteration prints
+ * Prints the Welcome/CSOPESY greeting, then per iteration prints
  * the developer roster via print_group() and prompts with "Command > ".
  * Parses standard input with std::getline and dispatches to the Marquee
  * until exit or EOF.
@@ -54,15 +68,10 @@ void CommandHandler::run()
 {
     std::string command;
 
-    // Prints Once
-    std::cout << "Welcome to CSOPESY!\n";
-    std::cout << "\n";
-    std::cout << "Don't know what to type? Type help to know the commands!\n";
-    std::cout << "\n";
-
     // Runs continuously until the 'exit' command is issued or EOF is reached
     while (marquee.is_app_alive)
     {
+        print_greetings();
         print_group();
         std::cout << "Command > ";
 

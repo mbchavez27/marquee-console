@@ -45,6 +45,14 @@ public:
      */
     void print_group();
 
+    /**
+     * @brief Prints the welcome/CSOPESY greeting message.
+     *
+     * Outputs a welcome banner and a hint to type 'help'.
+     * Called once per prompt iteration in run().
+     */
+    void print_greetings();
+
 private:
     Marquee &marquee; ///< Reference to the managed Marquee instance.
 };
