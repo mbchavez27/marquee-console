@@ -32,8 +32,8 @@ public:
     /**
      * @brief Displays the help menu.
      *
-     * Prints the exact 7 supported commands: help, start_marquee,
-     * stop_marquee, set_text, set_speed, clear_screen, exit.
+     * Prints the exact 6 supported commands: help, start_marquee,
+     * stop_marquee, set_text, set_speed, exit.
      */
     void print_help();
 

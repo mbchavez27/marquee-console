@@ -27,13 +27,12 @@
 
 The main loop listens for the following precise string commands:
 
-1.  `help` - Print the 7 supported commands.
+1.  `help` - Print the 6 supported commands.
 2.  `start_marquee` - Start/resume continuous scrolling worker; prints `Marquee is already running.` if already active.
 3.  `stop_marquee` - Pause scrolling worker and clear marquee line/banner; prints `Marquee is already stopped.` if already stopped.
 4.  `set_text` - Prompt `Enter text: `, lock mutex, update `marquee_text`; updates live display dynamically without restart.
 5.  `set_speed` - Prompt for int `> 0`, update `speed_ms`; updates live scroll rate dynamically without restart.
-6.  `clear_screen` - Wipe viewport; if `is_running == true`, re-prints banner so it remains visible; if stopped, stays blank.
-7.  `exit` - Set `is_app_alive = false`, `is_running = false`, join worker thread cleanly, print goodbye, break loop, return `0`.
+6.  `exit` - Set `is_app_alive = false`, `is_running = false`, join worker thread cleanly, print goodbye, break loop, return `0`.
 
 Per-prompt chrome: `Welcome to CSOPESY!` greeting once, then `Group Developers:` roster + `Command > ` every iteration. Unknown input prints `Unknown command. Type 'help'.`.
 

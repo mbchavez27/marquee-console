@@ -13,8 +13,8 @@ CommandHandler::CommandHandler(Marquee &m) : marquee(m) {}
 /**
  * @brief Outputs the list of available commands to the console.
  *
- * Prints the exact 7 supported commands: help, start_marquee,
- * stop_marquee, set_text, set_speed, clear_screen, exit.
+ * Prints the exact 6 supported commands: help, start_marquee,
+ * stop_marquee, set_text, set_speed, exit.
  */
 void CommandHandler::print_help()
 {
@@ -23,7 +23,6 @@ void CommandHandler::print_help()
               << "stop_marquee - pause scrolling\n"
               << "set_text - change marquee text\n"
               << "set_speed - change speed (ms)\n"
-              << "clear_screen - clear the screen\n"
               << "exit - quit\n";
     std::cout << "\n";
 }
@@ -144,10 +143,6 @@ void CommandHandler::run()
                 // Catch invalid types (e.g., letters) or out-of-range values
                 std::cout << "Invalid speed. Must be a positive integer greater than 0.\n";
             }
-        }
-        else if (command == "clear_screen")
-        {
-            marquee.clear_screen();
         }
         else if (command == "exit")
         {

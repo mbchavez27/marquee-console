@@ -69,20 +69,6 @@ public:
     void set_speed(int new_speed_ms);
 
     /**
-     * @brief Clears the current line on the console output.
-     *
-     * Typically used to clean up trailing characters before rendering the next frame.
-     */
-    void clear_line();
-
-    /**
-     * @brief Clears the entire console screen.
-     *
-     * Used for full screen resets or layout changes.
-     */
-    void clear_screen();
-
-    /**
      * @brief Renders the current frame at the top of the console.
      */
     void render_current_frame();

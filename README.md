@@ -40,12 +40,11 @@ cmake --build build --target run  # build + run in one step
 
 | Command         | Action                                                                                     |
 | --------------- | ------------------------------------------------------------------------------------------ |
-| `help`          | Print the 7 supported commands.                                                           |
+| `help`          | Print the 6 supported commands.                                                           |
 | `start_marquee` | Start continuous background scrolling. Prints `Marquee is already running.` if already on. |
 | `stop_marquee`  | Pause worker, clear the 5 banner rows. Prints `Marquee is already stopped.` if already off.|
 | `set_text`      | Prompt `Enter text: `, lock mutex, update `marquee_text`. Live update while scrolling.     |
 | `set_speed`     | Print current speed, prompt for new ms value, validate positive int, update `speed_ms`.    |
-| `clear_screen`  | Pause marquee, clear viewport, redraw banner, resume scrolling. Preserves marquee state.   |
 | `exit`          | Set `is_app_alive=false`, join worker thread, print `Goodbye.`, break loop.                |
 
 Per-prompt chrome: greeting `Welcome to CSOPESY!` + `Don't know what to type?...` once, then every iteration `Group Developers:` roster + `Command > `. Unknown input prints `Unknown command. Type 'help'.`.
@@ -68,7 +67,6 @@ start_marquee - begin scrolling
 stop_marquee - pause scrolling
 set_text - change marquee text
 set_speed - change speed (ms)
-clear_screen - clear the screen
 exit - quit
 
 Group Developers:
@@ -103,12 +101,6 @@ Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
 
-Command > clear_screen
-
-Group Developers:
-Chavez, Max Benedict B.
-Leano, Jeremy L.
-
 Command > stop_marquee
 
 Group Developers:
@@ -133,7 +125,6 @@ LICENSE           # MIT
 ## Notes
 
 - Worker thread uses `std::condition_variable` to sleep between frames and wake early on `stop_marquee` or `exit`.
-- `clear_line()` is internal — called only by `stop_marquee` to wipe the banner rows.
 - `render_current_frame()` uses raw ANSI escape sequences (Win32 `SetConsoleCursorPosition` fallback).
 - `move_cursor()` is Windows-only, guarded by `#ifdef _WIN32`.
 - `.gitignore` covers `build/`, object files, and CMake-generated files.

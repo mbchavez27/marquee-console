@@ -30,7 +30,7 @@
 
 1. Check if `is_running` is already `false`. If yes, output "Marquee is already stopped." and return.
 2. If no, set `is_running = false` via `exchange`.
-3. Signal the background worker thread to stop/pause scrolling, and clean up or clear the marquee rendering area using `clear_line()` (or row clears).
+3. Signal the background worker thread to stop/pause scrolling, and clean up or clear the marquee rendering area.
 4. Worker thread pauses execution without terminating the main application.
 
 **Post-conditions:**
