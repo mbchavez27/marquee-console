@@ -1,5 +1,6 @@
 #include "CommandHandler.h"
 #include "Marquee.h"
+#include <cctype>
 #include <iostream>
 #include <string>
 
@@ -61,11 +62,11 @@ void CommandHandler::print_greetings()
  * Prints the Welcome/CSOPESY greeting, then per iteration prints
  * the developer roster via print_group() and prompts with "Command > ".
  * Parses standard input with std::getline and dispatches to the Marquee
- * until exit or EOF.
+ * until exit or EOF. Supports inline arguments for set_text and set_speed.
  */
 void CommandHandler::run()
 {
-    std::string command;
+    std::string line;
 
     print_greetings();
 
@@ -76,83 +77,122 @@ void CommandHandler::run()
         std::cout << "Command > " << std::flush;
 
         // Wait for user input; break if the input stream fails (e.g., EOF)
-        if (!std::getline(std::cin, command))
+        if (!std::getline(std::cin, line))
         {
             break;
         }
 
-        if (command == "help")
+        // Trim leading whitespace
+        size_t first_non_space = line.find_first_not_of(" \t");
+        if (first_non_space == std::string::npos)
+        {
+            continue;
+        }
+
+        // Separate command name and argument payload
+        size_t space_pos = line.find_first_of(" \t", first_non_space);
+        std::string cmd;
+        std::string args;
+
+        if (space_pos == std::string::npos)
+        {
+            cmd = line.substr(first_non_space);
+        }
+        else
+        {
+            cmd = line.substr(first_non_space, space_pos - first_non_space);
+            size_t arg_start = line.find_first_not_of(" \t", space_pos);
+            if (arg_start != std::string::npos)
+            {
+                args = line.substr(arg_start);
+            }
+        }
+
+        if (cmd == "help")
         {
             std::cout << "\n";
             print_help();
         }
-        else if (command == "start_marquee")
+        else if (cmd == "start_marquee")
         {
             std::cout << "\n";
             marquee.start_marquee();
             std::cout << "\n";
         }
-        else if (command == "stop_marquee")
+        else if (cmd == "stop_marquee")
         {
             std::cout << "\n";
             marquee.stop_marquee();
             std::cout << "\n";
         }
-        else if (command == "set_text")
+        else if (cmd == "set_text")
         {
             std::cout << "\n";
-            std::cout << "Current text is " << marquee.marquee_text << "\n\n";
-            std::cout << "Enter text: " << std::flush;
-            std::string next_text;
-
-            // Wait for the multi-word string payload
-            if (!std::getline(std::cin, next_text))
+            if (args.empty())
             {
-                break;
+                std::cout << "Invalid text. Usage: set_text <text>\n\n";
             }
-
-            std::cout << "New text set to " << next_text << "\n\n";
-            marquee.set_text(next_text);
+            else
+            {
+                // Strip outer surrounding quotes if provided
+                if (args.size() >= 2 && ((args.front() == '"' && args.back() == '"') || (args.front() == '\'' && args.back() == '\'')))
+                {
+                    args = args.substr(1, args.size() - 2);
+                }
+                std::cout << "New text set to " << args << "\n\n";
+                marquee.set_text(args);
+            }
         }
-        else if (command == "set_speed")
+        else if (cmd == "set_speed")
         {
             std::cout << "\n";
-            std::cout << "Current speed is " << marquee.speed_ms << "ms\n\n";
-            std::cout << "Enter new speed (in milliseconds): " << std::flush;
-            std::string line;
-            if (!std::getline(std::cin, line))
+            if (args.empty())
             {
-                break;
+                std::cout << "Invalid speed. Must be a positive integer greater than 0.\n\n";
             }
+            else
+            {
+                try
+                {
+                    size_t pos = 0;
+                    int value = std::stoi(args, &pos);
 
-            // Safely parse user input into an integer
-            try
-            {
-                int value = std::stoi(line);
-                if (value <= 0)
-                {
-                    std::cout << "Invalid speed. Must be a positive integer greater than 0.\n";
+                    // Ensure no trailing non-whitespace characters
+                    bool valid = true;
+                    for (size_t i = pos; i < args.size(); ++i)
+                    {
+                        if (!std::isspace(static_cast<unsigned char>(args[i])))
+                        {
+                            valid = false;
+                            break;
+                        }
+                    }
+
+                    if (!valid || value <= 0)
+                    {
+                        std::cout << "Invalid speed. Must be a positive integer greater than 0.\n\n";
+                    }
+                    else
+                    {
+                        marquee.set_speed(value);
+                        std::cout << "Speed set to " << value << "ms\n\n";
+                    }
                 }
-                else
+                catch (const std::exception &)
                 {
-                    marquee.set_speed(value);
-                    std::cout << "Speed set to " << value << "ms\n\n";
+                    // Catch invalid types (e.g., letters) or out-of-range values
+                    std::cout << "Invalid speed. Must be a positive integer greater than 0.\n\n";
                 }
-            }
-            catch (const std::exception &)
-            {
-                // Catch invalid types (e.g., letters) or out-of-range values
-                std::cout << "Invalid speed. Must be a positive integer greater than 0.\n";
             }
         }
-        else if (command == "exit")
+        else if (cmd == "exit")
         {
             // Shut down the app loop: stop worker thread cleanly, print goodbye, break
             marquee.stop_worker();
             std::cout << "Goodbye.\n";
             break;
         }
-        else if (!command.empty())
+        else
         {
             std::cout << "Unknown command. Type 'help'.\n";
         }

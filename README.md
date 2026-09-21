@@ -43,8 +43,8 @@ cmake --build build --target run  # build + run in one step
 | `help`          | Print the 6 supported commands.                                                           |
 | `start_marquee` | Start continuous background scrolling. Prints `Marquee is already running.` if already on. |
 | `stop_marquee`  | Pause worker, clear the 5 banner rows. Prints `Marquee is already stopped.` if already off.|
-| `set_text`      | Prompt `Enter text: `, lock mutex, update `marquee_text`. Live update while scrolling.     |
-| `set_speed`     | Print current speed, prompt for new ms value, validate positive int, update `speed_ms`.    |
+| `set_text`      | Format: `set_text <text>`. Lock mutex, update `marquee_text`. Live update while scrolling. |
+| `set_speed`     | Format: `set_speed <speed_ms>`. Validate positive int, update `speed_ms`.                  |
 | `exit`          | Set `is_app_alive=false`, join worker thread, print `Goodbye.`, break loop.                |
 
 Per-prompt chrome: greeting `Welcome to CSOPESY!` + `Don't know what to type?...` once, then every iteration `Group Developers:` roster + `Command > `. Unknown input prints `Unknown command. Type 'help'.`.
@@ -79,22 +79,16 @@ Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
 
-Command > set_text
+Command > set_text CSOPESY Marquee!
 
-Current text is Hello CSOPESY!
-
-Enter text: CSOPESY Marquee!
 New text set to CSOPESY Marquee!
 
 Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
 
-Command > set_speed
+Command > set_speed 100
 
-Current speed is 200ms
-
-Enter new speed (in milliseconds): 100
 Speed set to 100ms
 
 Group Developers:
