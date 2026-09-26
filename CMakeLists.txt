@@ -12,7 +12,11 @@ add_executable(marquee_app
   src/AsciiArt.cpp
 )
 target_include_directories(marquee_app PRIVATE include)
-target_compile_options(marquee_app PRIVATE -Wall -Wextra)
+if(MSVC)
+  target_compile_options(marquee_app PRIVATE /W4)
+else()
+  target_compile_options(marquee_app PRIVATE -Wall -Wextra)
+endif()
 find_package(Threads REQUIRED)
 target_link_libraries(marquee_app PRIVATE Threads::Threads)
 
