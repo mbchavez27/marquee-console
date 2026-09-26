@@ -38,7 +38,9 @@ void CommandHandler::print_group()
 {
     std::cout << "Group Developers:\n"
               << "Chavez, Max Benedict B.\n"
-              << "Leano, Jeremy L.\n";
+              << "Leano, Jeremy L.\n"
+              << "Go, Timothy Aaron S.\n"
+              << "De La Calzada, Wanda\n";
     std::cout << "\n";
 }
 
