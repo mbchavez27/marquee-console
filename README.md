@@ -2,6 +2,13 @@
 
 A multi-threaded C++ console app that displays scrolling text as a 5-row ASCII banner. Built for CSOPESY (OS emulator exercise).
 
+## Group Developers
+
+- Chavez, Max Benedict B.
+- Leano, Jeremy L.
+- Go, Timothy Aaron S.
+- De La Calzada, Wanda
+
 ## What it does
 
 Prompts for commands in a `Command > ` loop and renders a continuously scrolling ASCII banner at the top of the terminal. Text and speed can be changed live while the marquee is running. Screen clearing pauses the marquee, wipes the viewport, redraws the banner, and resumes scrolling — no manual restart needed.
@@ -59,6 +66,8 @@ Don't know what to type? Type help to know the commands!
 Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
+Go, Timothy Aaron S.
+De La Calzada, Wanda
 
 Command > help
 
@@ -72,12 +81,16 @@ exit - quit
 Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
+Go, Timothy Aaron S.
+De La Calzada, Wanda
 
 Command > start_marquee
 
 Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
+Go, Timothy Aaron S.
+De La Calzada, Wanda
 
 Command > set_text CSOPESY Marquee!
 
@@ -86,6 +99,8 @@ New text set to CSOPESY Marquee!
 Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
+Go, Timothy Aaron S.
+De La Calzada, Wanda
 
 Command > set_speed 100
 
@@ -94,12 +109,16 @@ Speed set to 100ms
 Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
+Go, Timothy Aaron S.
+De La Calzada, Wanda
 
 Command > stop_marquee
 
 Group Developers:
 Chavez, Max Benedict B.
 Leano, Jeremy L.
+Go, Timothy Aaron S.
+De La Calzada, Wanda
 
 Command > exit
 Goodbye.
